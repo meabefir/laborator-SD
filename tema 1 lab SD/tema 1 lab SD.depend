@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1613913581 source:c:\users\strutul\desktop\codeblocks\learn\tema 1 lab sd\main.cpp
+	<random>
+	<iostream>
+	<ctime>
+	<chrono>
+	<algorithm>
+	<vector>
+	<cmath>
+	<bits.h>
+
