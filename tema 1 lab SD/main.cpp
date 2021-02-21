@@ -10,7 +10,7 @@
 using namespace std;
 using namespace std::chrono;
 
-#define MAX_SIZE 10000000
+#define MAX_SIZE 1000000
 
 int lowerBorder = 0;
 int upperBorder = 1000000;
@@ -236,16 +236,45 @@ unsigned __int64 radixsort(int arr[], int s){
     return total_time;
 }
 
+void radix_suff(int arr[], int l, int r, int pos, int maxim){
+    if (1 << pos > maxim) return;
+    vector <int> has_0;
+    vector <int> has_1;
+    for (int i=l; i <= r; i++){
+        if (arr[i] & 1 << pos)
+            has_1.push_back(arr[i]);
+        else
+            has_0.push_back(arr[i]);
+    }
+    int k = l;
+    for (int i =0; i < has_0.size();i++)
+        arr[k++] = has_0[i];
+    for (int i =0; i < has_1.size();i++)
+        arr[k++] = has_1[i];
+
+    radix_suff(arr,l,r,pos+1,maxim);
+}
+
+unsigned __int64 radixsort_suff(int arr[], int s){
+    unsigned __int64 time1 = get_milliseconds();
+
+    int maxim = get_max(arr,s);
+
+    radix_suff(arr,0,s-1,0,maxim);
+
+    unsigned __int64 time2 = get_milliseconds();
+    unsigned __int64 total_time = time2 - time1;
+    return total_time;
+}
+
 int main()
 {
     generate_reversed_almost_sorted_array(arr, MAX_SIZE);
 //print_arr(arr,MAX_SIZE);
-    cout << "time is " << radixsort(arr, MAX_SIZE);
+    cout << "time is " << mergesort(arr, MAX_SIZE);
 //print_arr(arr,MAX_SIZE);
     //print_arr(arr,MAX_SIZE);
 
     cout << '\n' << is_sorted(arr,MAX_SIZE);
 
-    //for (int n=0; n<10; ++n)
-    //    std::cout << dis(gen) << ' ';
 }
