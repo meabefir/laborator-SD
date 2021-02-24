@@ -6,37 +6,85 @@
 #include <vector>
 #include <cmath>
 #include <bits.h>
+#include <string>
+#include <functional>
+#include <fstream>
 
 using namespace std;
 using namespace std::chrono;
 
-#define MAX_SIZE 1000000
+ifstream fin("in.in");
 
-int lowerBorder = 0;
-int upperBorder = 1000000;
+#define MAX_SIZE 100000000
+
 int frec[MAX_SIZE] = {0};
-int arr[MAX_SIZE];
+int i_arr[MAX_SIZE];
+int c_arr[MAX_SIZE];
+int _size, _max;
 
 std::mt19937 gen(time(0));
 
-std::uniform_int_distribution<int> dis(lowerBorder, upperBorder);
-std::uniform_int_distribution<int> dis_size(0, MAX_SIZE-1);
+std::uniform_int_distribution<int> rng(0, 0);
+
+template <typename t>
+class arr{
+    int _size;
+    t *data;
+
+    public:
+        arr(int _s){
+            _size = _s;
+            data = new t[_size];
+
+            // init
+            for (int i = 0; i < _size; i++)
+                data[i] = i+.5f;
+        }
+
+        arr(arr &other){
+            _size = other._size;
+            data = new t[_size];
+            for (int i = 0; i < _size; i++)
+                data[i] = other.data[i];
+        }
+
+        ~arr(){
+            delete []data;
+        }
+
+        void print(){
+            for (int i = 0; i < _size; i++)
+                cout << data[i] << ' ';
+            cout << '\n';
+        }
+
+        void swp(int pos1, int pos2){
+            t aux = data[pos1];
+            data[pos1] = data[pos2];
+            data[pos2] = aux;
+        }
+
+        t operator[] (int pos){
+            return data[pos];
+        }
+};
 
 int* generate_random_array(int arr[], int s){
     for (int i = 0; i < s; i++){
-        arr[i] = dis(gen);
+        //cout << typeid(arr).name() << ' ';
+        arr[i] = rng(gen);
     }
-    return arr;
 }
 
 int* generate_almost_sorted_array(int arr[], int s){
-    int *_ = generate_random_array(arr, s);
+    generate_random_array(arr, s);
 
-    sort(_,_+s);
+    sort(arr,arr+s);
 
+    std::uniform_int_distribution<int> r_size(0, s-1);
     for (int i = 0; i < max(1,s/10); i++){
-        int poz1 = dis_size(gen);
-        int poz2 = dis_size(gen);
+        int poz1 = r_size(gen);
+        int poz2 = r_size(gen);
 
         int aux = arr[poz1];
         arr[poz1] = arr[poz2];
@@ -63,7 +111,8 @@ int *generate_const_array(int arr[], int s){
     return arr;
 }
 
-bool is_sorted(int arr[], int s){
+template <typename t>
+bool is_sorted(t arr[], int s){
     for (int i = 0; i < s-1; i++){
         if (arr[i] > arr[i+1]) return false;
     }
@@ -89,9 +138,11 @@ int get_max(int arr[], int s){
     return maxim;
 }
 
-unsigned __int64 bubble_sort(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
+void str_sort(int arr[], int s){
+    sort(arr,arr+s);
+}
 
+void bubble_sort(int arr[], int s){
     for (int i = 0; i < s; i++){
         for (int j = 0; j < s-i; j++){
             if (arr[j] > arr[j+1]){
@@ -101,15 +152,9 @@ unsigned __int64 bubble_sort(int arr[], int s){
             }
         }
     }
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
-unsigned __int64 count_sort(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
-
+void count_sort(int arr[], int s){
     int maxim = get_max(arr,s);
 
     for (int i =0; i <= maxim; i++)
@@ -122,40 +167,40 @@ unsigned __int64 count_sort(int arr[], int s){
         for (int j = 1; j <= frec[i];j++)
             arr[k++] = i;
     }
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
-void quick(int arr[],int l,int r){
+template <typename NumberType>
+void quick(NumberType arr[],int l,int r){
     if (l < r){
-        int pivot = arr[l];
+        std::uniform_int_distribution<int> r_size(l, r);
+        int poz_random = r_size(gen);
+        int pivot = arr[poz_random];
         vector<int> mici;
+        vector<int> egale;
         vector<int> mari;
         for (int i = l; i<= r; i++)
             if (arr[i] < pivot)
                 mici.push_back(arr[i]);
-            else
+            else if (arr[i] > pivot)
                 mari.push_back(arr[i]);
-        for (int i = 0; i < mici.size(); i++)
-            arr[i+l] = mici[i];
-        for (int i = 0; i < mari.size(); i++)
-            arr[i+mici.size()+l] = mari[i];
+            else
+                egale.push_back(arr[i]);
 
-        quick(arr,l,l+mici.size());
-        quick(arr,l+mici.size()+1,r);
+        int k = l;
+        for (int i = 0; i < mici.size(); i++)
+            arr[k++] = mici[i];
+        for (int i = 0; i < egale.size(); i++)
+            arr[k++] = egale[i];
+        for (int i = 0; i < mari.size(); i++)
+            arr[k++] = mari[i];
+
+        quick(arr,l,l+mici.size()-1);
+        quick(arr,l+mici.size()+egale.size(),r);
     }
 }
 
-unsigned __int64 quicksort(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
-
+void quicksort(int arr[], int s){
     quick(arr,0,s-1);
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
 void combine(int arr[], int l, int mij, int r){
@@ -192,14 +237,9 @@ void merges(int arr[], int l, int r){
     }
 }
 
-unsigned __int64 mergesort(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
+void mergesort(int arr[], int s){
 
     merges(arr,0,s-1);
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
 void radix(int arr[], int l, int r, int pos){
@@ -223,17 +263,11 @@ void radix(int arr[], int l, int r, int pos){
     radix(arr,l+has_0.size(),r,pos-1);
 }
 
-unsigned __int64 radixsort(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
-
+void radixsort(int arr[], int s){
     int maxim = get_max(arr,s);
     int nr_bites = log2(maxim)+1;
 
     radix(arr,0,s-1,nr_bites);
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
 void radix_suff(int arr[], int l, int r, int pos, int maxim){
@@ -255,26 +289,70 @@ void radix_suff(int arr[], int l, int r, int pos, int maxim){
     radix_suff(arr,l,r,pos+1,maxim);
 }
 
-unsigned __int64 radixsort_suff(int arr[], int s){
-    unsigned __int64 time1 = get_milliseconds();
+void radixsort_suff(int arr[], int s){
 
     int maxim = get_max(arr,s);
 
     radix_suff(arr,0,s-1,0,maxim);
-
-    unsigned __int64 time2 = get_milliseconds();
-    unsigned __int64 total_time = time2 - time1;
-    return total_time;
 }
 
 int main()
 {
-    generate_reversed_almost_sorted_array(arr, MAX_SIZE);
-//print_arr(arr,MAX_SIZE);
-    cout << "time is " << mergesort(arr, MAX_SIZE);
-//print_arr(arr,MAX_SIZE);
-    //print_arr(arr,MAX_SIZE);
+    //cout << typeid(2).name() << endl;
 
-    cout << '\n' << is_sorted(arr,MAX_SIZE);
+    arr<int> x(1000000);
 
+    return 0;
+
+    bool a_crapat = false;
+
+    vector<pair<string,function<void(int[], int)>>> sort_types;
+
+    sort_types.push_back(make_pair("STL Sort", str_sort));
+    sort_types.push_back(make_pair("Quicksort", quicksort));
+    sort_types.push_back(make_pair("Mergesort", mergesort));
+    sort_types.push_back(make_pair("Count sort", count_sort));
+    sort_types.push_back(make_pair("Radix sort", radixsort));
+    sort_types.push_back(make_pair("Radix sort suffix", radixsort_suff));
+    sort_types.push_back(make_pair("Bubble sort", bubble_sort));
+
+    vector<pair<string,function<int*(int[], int)>>> arr_types;
+
+    arr_types.push_back(make_pair("Random array", generate_random_array));
+    arr_types.push_back(make_pair("Almost sorted array", generate_almost_sorted_array));
+    arr_types.push_back(make_pair("Reversed almost sorted array", generate_reversed_almost_sorted_array));
+    arr_types.push_back(make_pair("Constant array", generate_const_array));
+
+    int t;
+    fin >> t;
+    for (int i = 0; i < t; i++){
+        fin >> _size >> _max;
+        rng = std::uniform_int_distribution<int>(0, _max);
+
+        for (auto sort_type:sort_types){
+            cout << "\n\n - - - - - - - - - - - - - - " << sort_type.first << ":\n\n";
+
+            for (auto arr_type:arr_types){
+                cout << " Mod de construire vector: " << arr_type.first << '\n';
+                cout << " Construire vector...\r";
+                arr_type.second(i_arr, _size);
+                unsigned __int64 _start = get_milliseconds();
+                //print_arr(arr,_size);
+
+                cout << " Sortare vector...   \r";
+                sort_type.second(i_arr, _size);
+                //print_arr(arr,_size);
+                unsigned __int64 _end = get_milliseconds();
+                cout << " Durata in milisecunde --> " << _end - _start << '\n';
+                if (is_sorted(i_arr, _size))
+                    cout << " Sortat\n\n";
+                else{
+                    cout << "Nesortat\n\n";
+                    a_crapat = true;
+                }
+            }
+        }
+    }
+    if (a_crapat)
+        cout << "RIP";
 }
