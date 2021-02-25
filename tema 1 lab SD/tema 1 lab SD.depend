@@ -9,7 +9,20 @@
 	<cmath>
 	<bits.h>
 
-1614091802 source:c:\users\strutul\desktop\codeblocks\laborator sd\tema 1 lab sd\main.cpp
+1614165847 source:c:\users\strutul\desktop\codeblocks\laborator sd\tema 1 lab sd\main.cpp
+	<random>
+	<iostream>
+	<ctime>
+	<chrono>
+	<algorithm>
+	<vector>
+	<cmath>
+	<bits.h>
+	<string>
+	<functional>
+	<fstream>
+
+1614272715 source:c:\users\strutul\desktop\codeblocks\fac\laborator sd\tema 1 lab sd\main.cpp
 	<random>
 	<iostream>
 	<ctime>

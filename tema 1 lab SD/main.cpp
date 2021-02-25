@@ -23,33 +23,38 @@ int c_arr[MAX_SIZE];
 int _size, _max;
 
 std::mt19937 gen(time(0));
-
 std::uniform_int_distribution<int> rng(0, 0);
 
 template <typename t>
-class arr{
-    int _size;
-    t *data;
+class Arr{
+    vector<pair<string,function<void()>>> arr_types;
 
     public:
-        arr(int _s){
-            _size = _s;
-            data = new t[_size];
+    // stiu ca astea de obicei se fac private cu setere si getere dar nu aici
+    int _size;
+    int _max;
+    t *data;
 
-            // init
-            for (int i = 0; i < _size; i++)
-                data[i] = i+.5f;
+        Arr(int _s, int _m){
+            _size = _s;
+            _max = _m;
+            data = new t[_size];
         }
 
-        arr(arr &other){
+        Arr(Arr &other){
             _size = other._size;
             data = new t[_size];
             for (int i = 0; i < _size; i++)
                 data[i] = other.data[i];
         }
 
-        ~arr(){
+        ~Arr(){
             delete []data;
+        }
+
+        void init(t value){
+            for (int i = 0; i < _size; i++)
+                data[i] = value;
         }
 
         void print(){
@@ -67,15 +72,40 @@ class arr{
         t operator[] (int pos){
             return data[pos];
         }
+
+        float get_random_float() {
+            float random = ((float) rand()) / (float) RAND_MAX;
+            return random;
+        }
+
+        t get_random_value(uniform_int_distribution<int> rng){
+            if (*typeid(t).name() == 'i')
+                return rng(gen);
+            else if (*typeid(t).name() == 'f')
+                return get_random_float();
+            else if (*typeid(t).name() == 'c')
+                return rand()%26+97;
+        }
+
+        void generate_random_array(){
+            cout << "ouchers";
+            std::uniform_int_distribution<int> rng(0, _max);
+
+            for (int i = 0; i < _size; i++){
+                data[i] = this->get_random_value(rng);
+            }
+        }
 };
 
-int* generate_random_array(int arr[], int s){
-    for (int i = 0; i < s; i++){
-        //cout << typeid(arr).name() << ' ';
-        arr[i] = rng(gen);
+template <typename t>
+void generate_random_array(t& arr){
+    std::uniform_int_distribution<int> rng(0, arr._max);
+    for (int i = 0; i < arr._size; i++){
+        arr.data[i] = arr.get_random_value(rng);
     }
 }
 
+/*
 int* generate_almost_sorted_array(int arr[], int s){
     generate_random_array(arr, s);
 
@@ -110,27 +140,30 @@ int *generate_const_array(int arr[], int s){
         arr[i] = 0;
     return arr;
 }
+*/
 
 template <typename t>
-bool is_sorted(t arr[], int s){
+bool is_sorted(t *arr, int s){
     for (int i = 0; i < s-1; i++){
         if (arr[i] > arr[i+1]) return false;
     }
     return true;
 }
 
-void print_arr(int arr[], int s){
+template <typename t>
+void print_arr(t arr){
     cout << '\n';
-    for (int i =0; i < s; i++)
-        cout << arr[i] << ' ';
+    for (int i =0; i < arr._size; i++)
+        cout << arr.data[i] << ' ';
 }
 
 unsigned __int64 get_milliseconds(){
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-int get_max(int arr[], int s){
-    int maxim = arr[0];
+template <typename t>
+t get_max(t arr[], int s){
+    t maxim = arr[0];
     for (int i =1; i < s; i++){
         if (arr[i] > maxim)
             maxim = arr[i];
@@ -138,15 +171,17 @@ int get_max(int arr[], int s){
     return maxim;
 }
 
-void str_sort(int arr[], int s){
+template <typename t>
+void stl_sort(t *arr, int s){
     sort(arr,arr+s);
 }
 
-void bubble_sort(int arr[], int s){
+template <typename t>
+void bubble_sort(t* arr, int s){
     for (int i = 0; i < s; i++){
         for (int j = 0; j < s-i; j++){
             if (arr[j] > arr[j+1]){
-                int aux = arr[j];
+                t aux = arr[j];
                 arr[j] = arr[j+1];
                 arr[j+1] = aux;
             }
@@ -154,13 +189,22 @@ void bubble_sort(int arr[], int s){
     }
 }
 
-void count_sort(int arr[], int s){
-    int maxim = get_max(arr,s);
+template <typename t>
+void count_sort(t* arr, int s){
+    if (*typeid(t).name() == 'f'){
+        cout << " Count sort nu poate sorta floats! \n";
+        return;
+    }
+    t maxim = get_max(arr,s);
 
-    for (int i =0; i <= maxim; i++)
-        frec[i] = 0;
+    Arr<int> frec(maxim,s);
+    frec.init(0);
+
+    //for (int i =0; i <= maxim; i++)
+    //    frec[i] = 0;
+
     for (int i = 0; i < s; i++)
-        frec[arr[i]] ++;
+        frec[(int)arr[i]] = frec[(int)arr[i]]+1;
 
     int k = 0;
     for (int i = 0; i <= maxim; i++){
@@ -169,15 +213,15 @@ void count_sort(int arr[], int s){
     }
 }
 
-template <typename NumberType>
-void quick(NumberType arr[],int l,int r){
+template <typename t>
+void quick(t *arr,int l,int r){
     if (l < r){
         std::uniform_int_distribution<int> r_size(l, r);
         int poz_random = r_size(gen);
-        int pivot = arr[poz_random];
-        vector<int> mici;
-        vector<int> egale;
-        vector<int> mari;
+        t pivot = arr[poz_random];
+        vector<t> mici;
+        vector<t> egale;
+        vector<t> mari;
         for (int i = l; i<= r; i++)
             if (arr[i] < pivot)
                 mici.push_back(arr[i]);
@@ -199,13 +243,15 @@ void quick(NumberType arr[],int l,int r){
     }
 }
 
-void quicksort(int arr[], int s){
+template <typename t>
+void quicksort(t *arr, int s){
     quick(arr,0,s-1);
 }
 
-void combine(int arr[], int l, int mij, int r){
-    vector <int> st;
-    vector <int> dr;
+template <typename t>
+void combine(t *arr, int l, int mij, int r){
+    vector <t> st;
+    vector <t> dr;
 
     for (int i = l; i <= mij; i++){
         st.push_back(arr[i]);
@@ -227,7 +273,8 @@ void combine(int arr[], int l, int mij, int r){
         arr[k++] = dr[j++];
 }
 
-void merges(int arr[], int l, int r){
+template <typename t>
+void merges(t *arr, int l, int r){
     if (l < r){
         int mij = l + (r-l)/2;
         merges(arr,l,mij);
@@ -237,18 +284,19 @@ void merges(int arr[], int l, int r){
     }
 }
 
-void mergesort(int arr[], int s){
-
+template <typename t>
+void mergesort(t *arr, int s){
     merges(arr,0,s-1);
 }
 
-void radix(int arr[], int l, int r, int pos){
+template <typename t>
+void radix(t *arr, int l, int r, int pos){
     if (pos < 0) return;
     if (l >= r) return;
-    vector <int> has_0;
-    vector <int> has_1;
+    vector <t> has_0;
+    vector <t> has_1;
     for (int i=l; i <= r; i++){
-        if (arr[i] & (1<<pos))
+        if ((int)arr[i] & (1<<pos))
             has_1.push_back(arr[i]);
         else
             has_0.push_back(arr[i]);
@@ -263,33 +311,46 @@ void radix(int arr[], int l, int r, int pos){
     radix(arr,l+has_0.size(),r,pos-1);
 }
 
-void radixsort(int arr[], int s){
-    int maxim = get_max(arr,s);
+template <typename t>
+void radixsort(t *arr, int s){
+    if (*typeid(t).name() == 'f'){
+        cout << " Radix nu merge pentru floats! \n";
+        return;
+    }
+    t maxim = get_max(arr,s);
     int nr_bites = log2(maxim)+1;
 
     radix(arr,0,s-1,nr_bites);
 }
 
-void radix_suff(int arr[], int l, int r, int pos, int maxim){
+template <typename t>
+void radix_suff(t *arr, int l, int r, int pos, int maxim){
     if (1 << pos > maxim) return;
-    vector <int> has_0;
-    vector <int> has_1;
-    for (int i=l; i <= r; i++){
-        if (arr[i] & 1 << pos)
-            has_1.push_back(arr[i]);
-        else
-            has_0.push_back(arr[i]);
-    }
-    int k = l;
-    for (int i =0; i < has_0.size();i++)
-        arr[k++] = has_0[i];
-    for (int i =0; i < has_1.size();i++)
-        arr[k++] = has_1[i];
+    vector <t> has_0;
+    vector <t> has_1;
+    try {
+        for (int i=l; i <= r; i++){
+            if ((int)arr[i] & 1 << pos)
+                has_1.push_back(arr[i]);
+            else
+                has_0.push_back(arr[i]);
+        }
+        int k = l;
+        for (int i =0; i < has_0.size();i++)
+            arr[k++] = has_0[i];
+        for (int i =0; i < has_1.size();i++)
+            arr[k++] = has_1[i];
 
-    radix_suff(arr,l,r,pos+1,maxim);
+        radix_suff(arr,l,r,pos+1,maxim);
+    } catch (int x){return;}
 }
 
-void radixsort_suff(int arr[], int s){
+template <typename t>
+void radixsort_suff(t *arr, int s){
+    if (*typeid(t).name() == 'f'){
+        cout << " Radix nu merge pentru floats! \n";
+        return;
+    }
 
     int maxim = get_max(arr,s);
 
@@ -298,17 +359,24 @@ void radixsort_suff(int arr[], int s){
 
 int main()
 {
-    //cout << typeid(2).name() << endl;
+    srand(time(0));
 
-    arr<int> x(1000000);
+    Arr<int> v(1000000,1000);
+    //v.print();
+    generate_random_array(v);
+    stl_sort(v.data,v._size);
+    //v.print();
+
+    cout << is_sorted(v.data,v._size);
 
     return 0;
 
     bool a_crapat = false;
 
-    vector<pair<string,function<void(int[], int)>>> sort_types;
 
-    sort_types.push_back(make_pair("STL Sort", str_sort));
+    vector<pair<string,function<void(int[], int)>>> sort_types;
+/*
+    sort_types.push_back(make_pair("STL Sort", stl_sort));
     sort_types.push_back(make_pair("Quicksort", quicksort));
     sort_types.push_back(make_pair("Mergesort", mergesort));
     sort_types.push_back(make_pair("Count sort", count_sort));
@@ -316,13 +384,14 @@ int main()
     sort_types.push_back(make_pair("Radix sort suffix", radixsort_suff));
     sort_types.push_back(make_pair("Bubble sort", bubble_sort));
 
+*/
     vector<pair<string,function<int*(int[], int)>>> arr_types;
-
+/*
     arr_types.push_back(make_pair("Random array", generate_random_array));
     arr_types.push_back(make_pair("Almost sorted array", generate_almost_sorted_array));
     arr_types.push_back(make_pair("Reversed almost sorted array", generate_reversed_almost_sorted_array));
     arr_types.push_back(make_pair("Constant array", generate_const_array));
-
+*/
     int t;
     fin >> t;
     for (int i = 0; i < t; i++){
