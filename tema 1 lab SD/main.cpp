@@ -156,7 +156,7 @@ unsigned __int64 get_milliseconds(){
 }
 
 template <typename t>
-t get_max(t arr[], int s){
+t get_max(t* arr, int s){
     t maxim = arr[0];
     for (int i =1; i < s; i++){
         if (arr[i] > maxim)
@@ -166,12 +166,12 @@ t get_max(t arr[], int s){
 }
 
 template <typename t>
-void stl_sort(t& arr, int s){
-    sort(arr.data,arr.data+s);
+void stl_sort(t* arr, int s){
+    sort(arr,arr+s);
 }
 
 template <typename t>
-void bubble_sort(t arr[], int s){
+void bubble_sort(t* arr, int s){
     for (int i = 0; i < s; i++){
         for (int j = 0; j < s-i; j++){
             if (arr[j] > arr[j+1]){
@@ -184,7 +184,7 @@ void bubble_sort(t arr[], int s){
 }
 
 template <typename t>
-void count_sort(t arr[], int s){
+void count_sort(t* arr, int s){
     if (*typeid(t).name() == 'f'){
         cout << " Count sort nu poate sorta floats! \n";
         return;
@@ -193,9 +193,6 @@ void count_sort(t arr[], int s){
 
     Arr<int> frec(maxim,s);
     frec.init(0);
-
-    //for (int i =0; i <= maxim; i++)
-    //    frec[i] = 0;
 
     for (int i = 0; i < s; i++)
         frec.set_pos((int)arr[i],frec[(int)arr[i]]+1);
@@ -208,7 +205,7 @@ void count_sort(t arr[], int s){
 }
 
 template <typename t>
-void quick(t arr[],int l,int r){
+void quick(t* arr,int l,int r){
     if (l < r){
         std::uniform_int_distribution<int> r_size(l, r);
         int poz_random = r_size(gen);
@@ -238,12 +235,12 @@ void quick(t arr[],int l,int r){
 }
 
 template <typename t>
-void quicksort(t arr[], int s){
+void quicksort(t* arr, int s){
     quick(arr,0,s-1);
 }
 
 template <typename t>
-void combine(t arr[], int l, int mij, int r){
+void combine(t* arr, int l, int mij, int r){
     vector <t> st;
     vector <t> dr;
 
@@ -268,7 +265,7 @@ void combine(t arr[], int l, int mij, int r){
 }
 
 template <typename t>
-void merges(t& arr, int l, int r){
+void merges(t* arr, int l, int r){
     if (l < r){
         int mij = l + (r-l)/2;
         merges(arr,l,mij);
@@ -279,12 +276,12 @@ void merges(t& arr, int l, int r){
 }
 
 template <typename t>
-void mergesort(t& arr, int s){
+void mergesort(t* arr, int s){
     merges(arr,0,s-1);
 }
 
 template <typename t>
-void radix(t arr[], int l, int r, int pos){
+void radix(t* arr, int l, int r, int pos){
     if (pos < 0) return;
     if (l >= r) return;
     vector <t> has_0;
@@ -306,7 +303,7 @@ void radix(t arr[], int l, int r, int pos){
 }
 
 template <typename t>
-void radixsort(t arr[], int s){
+void radixsort(t* arr, int s){
     if (*typeid(t).name() == 'f'){
         cout << " Radix nu merge pentru floats! \n";
         return;
@@ -318,7 +315,7 @@ void radixsort(t arr[], int s){
 }
 
 template <typename t>
-void radix_suff(t arr[], int l, int r, int pos, int maxim){
+void radix_suff(t* arr, int l, int r, int pos, int maxim){
     if (1 << pos > maxim) return;
     vector <t> has_0;
     vector <t> has_1;
@@ -340,7 +337,7 @@ void radix_suff(t arr[], int l, int r, int pos, int maxim){
 }
 
 template <typename t>
-void radixsort_suff(t arr[], int s){
+void radixsort_suff(t* arr, int s){
     if (*typeid(t).name() == 'f'){
         cout << " Radix nu merge pentru floats! \n";
         return;
@@ -363,7 +360,7 @@ int main()
     for (int i = 0; i < t; i++){
         fin >> _size >> _max;
         rng = std::uniform_int_distribution<int>(0, _max);
-        Arr<char> v(_size,_max); ///////////////////////////////////////////////////////////////////
+        Arr<int> v(_size,_max); ///////////////////////////////////////////////////////////////////
 
         for (int i = 1; i <= generate_nr; i++){
             switch(i){
@@ -373,11 +370,11 @@ int main()
                 break;
             case 2:
                 generate_almost_sorted_array(v.data,v._size,v._max);
-                cout << " - - - - - - Elemente aproape random:\n\n";
+                cout << " - - - - - - Elemente aproape sortate:\n\n";
                 break;
             case 3:
                 generate_reversed_almost_sorted_array(v.data,v._size,v._max);
-                cout << " - - - - - - Elemente aproape random in ordine inversa:\n\n";
+                cout << " - - - - - - Elemente aproape sortate in ordine inversa:\n\n";
                 break;
             case 4:
                 generate_const_array(v.data,v._size);
@@ -386,13 +383,13 @@ int main()
             }
 
             for (int j = 1; j <= sortari_nr; j++){
-                Arr<char> copie(v); ///////////////////////////////////////////////////////////////////
+                Arr<int> copie(v); ///////////////////////////////////////////////////////////////////
 
                 unsigned __int64 _start = get_milliseconds();
                 switch(j){
-                case 1:
+                case 6:
                     cout << " STL sort ";
-                    stl_sort(copie,copie._size);
+                    stl_sort(copie.data,copie._size);
                     break;
                 case 2:
                     cout << " Quicksort ";
@@ -410,7 +407,7 @@ int main()
                     cout << " Radixsort sufix ";
                     radixsort_suff(copie.data,copie._size);
                     break;
-                case 6:
+                case 1:
                     cout << " Count sort ";
                     count_sort(copie.data,copie._size);
                     break;
@@ -422,7 +419,7 @@ int main()
                 unsigned __int64 _end = get_milliseconds();
                 unsigned __int64 _total = _end - _start;
 
-                cout << "--> " << _total << " ms" << '\n';
+                cout << "--> " << _total << " ms " << is_sorted(copie,copie._size) << '\n';
 
             }
             cout << "\n\n";
