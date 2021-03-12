@@ -357,6 +357,7 @@ int main()
     f >> t;
     for (int tt = 0; tt < t; tt++){
         f >> max_size >> max_value;
+        cout << " Vector de lungime " << max_size << " cu elementul maxim " << max_value << " :\n\n";
         vector<double> arr(max_size);
 
         for (int generate_type = 1; generate_type <= generate_types; generate_type++){
