@@ -94,7 +94,7 @@ int get_max(int arr[], int s){
     return maxim;
 }
 
-void str_sort(int* arr, int s){
+void stl_sort(int arr[], int s){
     sort(arr,arr+s);
 }
 
@@ -125,7 +125,7 @@ void count_sort(int* arr, int s){
     }
 }
 
-void quick(int* arr,int l,int r){
+void quick(int arr[],int l,int r){
     if (l < r){
         std::uniform_int_distribution<int> r_size(l, r);
         int poz_random = r_size(gen);
@@ -154,7 +154,7 @@ void quick(int* arr,int l,int r){
     }
 }
 
-void quicksort(int* arr, int s){
+void quicksort(int arr[], int s){
     quick(arr,0,s-1);
 }
 
@@ -257,7 +257,7 @@ int main()
 
     vector<pair<string,function<void(int*, int)>>> sort_types;
 
-    sort_types.push_back(make_pair("STL Sort", str_sort));
+    sort_types.push_back(make_pair("STL Sort", stl_sort));
     sort_types.push_back(make_pair("Quicksort", quicksort));
     sort_types.push_back(make_pair("Mergesort", mergesort));
     sort_types.push_back(make_pair("Count sort", count_sort));

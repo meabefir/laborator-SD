@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1615368383 source:c:\users\strutul\desktop\codeblocks\fac\laborator sd\tema 1 sortari cu template\main.cpp
+	<random>
+	<iostream>
+	<ctime>
+	<chrono>
+	<algorithm>
+	<vector>
+	<cmath>
+	<bits.h>
+	<string>
+	<functional>
+	<fstream>
+
